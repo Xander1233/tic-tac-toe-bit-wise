@@ -18,7 +18,7 @@ public class Field {
             { 2, 5, 8 }
     };
 
-    private WinStatusFlag winFlag = WinStatusFlag.NONE/* => Ongoing game (No winner yet) */;
+    private WinStatusFlag winFlag = WinStatusFlag.NONE; /* => Ongoing game (No winner yet) */;
 
     public boolean Turn(int pos, PlayerFlags player) {
 

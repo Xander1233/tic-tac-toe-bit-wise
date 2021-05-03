@@ -1,15 +1,97 @@
+import java.util.Scanner;
+
 import static java.lang.Integer.parseInt;
 
 public class Controller {
 
     Field field;
+    View view;
 
     Controller() {
         field = new Field();
+        view = new View();
     }
 
     public Field getField() {
         return field;
+    }
+
+    public void execute() {
+
+        view.printMenu();
+
+        Scanner sc = new Scanner(System.in);
+
+        while (this.getField().getWinFlag() == WinStatusFlag.NONE) {
+            System.out.println();
+
+            for (int i = 0; i < 2 && this.getField().getWinFlag() == WinStatusFlag.NONE; i++) {
+
+                PlayerFlags currentPlayer =
+                        i == 0
+                                ? PlayerFlags.PLAYER_1
+                                : PlayerFlags.PLAYER_2;
+
+                view.printField(this.field);
+
+                System.out.println(
+                        (currentPlayer == PlayerFlags.PLAYER_1
+                                ? "Player 1"
+                                : "Player 2"
+                        )
+                                + "'s turn!"
+                );
+
+                int[] pos = new int[2];
+
+                for (int j = 0; j < pos.length; j++) {
+                    int x = 3;
+                    do {
+                        System.out.println("Please insert a valid "
+                                + (j == 0 ? "X" : "Y")
+                                + " Coordinate ("
+                                + (j == 0 ? "Vertical" : "Horizontal")
+                                + ") (0 - 2) -> ");
+                        x = this.isValidInput(sc.next());
+                    } while (x > 2 || x < 0);
+
+                    pos[j] = x;
+                }
+
+                boolean isPositionInserted = this.doTurn(pos, currentPlayer);
+
+                if (!isPositionInserted) {
+                    i--;
+                    System.out.println("This field is already owned by a player! Try again");
+                    continue;
+                }
+                this.checkWin(currentPlayer);
+            }
+        }
+
+        System.out.println();
+        System.out.println();
+        System.out.println("---------------------- Game end ----------------------");
+        System.out.println();
+
+        view.printField(this.field);
+
+        switch (this.getField().getWinFlag()) {
+            case DRAW -> {
+                System.out.println("Draw! Nobody won...");
+            }
+            case PLAYER_1 -> {
+                System.out.println("Player 1 won! \uD83C\uDF89");
+            }
+            case PLAYER_2 -> {
+                System.out.println("Player 2 won! \uD83C\uDF89");
+            }
+        }
+
+        System.out.println();
+        System.out.println();
+        System.out.println("Restart the program to start a new session...");
+        System.out.println("Exit...");
     }
 
     public boolean doTurn(int[] pos, PlayerFlags currentPlayer) {
@@ -22,41 +104,8 @@ public class Controller {
         this.field.checkWin(currentPlayer);
     }
 
-    public void printField() {
-        int field = this.getField().getArea();
-
-        System.out.println("      0  |  1  |  2  ");
-        System.out.print("   __________________");
-
-        for (int i = 0; i < 9; i++) {
-            if ((i + 3) % 3 == 0) System.out.print("\n" + (i / 3) + "  ");
-            String output = "-";
-
-            if ((field & (1 << i)) > 0) output = "O";
-            else if ((field & (1 << (i + 9))) > 0) output = "X";
-
-            System.out.print("|  " + output + "  ");
-
-            if ((i + 1) % 3 == 0) System.out.print("|\n   ------------------");
-        }
-
-        System.out.println();
-        System.out.println();
-    }
-
     public int isValidInput(String input) {
         if (input.matches("[0-2]")) return parseInt(input);
         return 3;
-    }
-
-    public static void printMenu() {
-        System.out.println(" _________  ___  ________ _________  ________  ________ _________  ________  _______      ");
-        System.out.println("|\\___   ___\\\\  \\|\\   ____\\\\___   ___\\\\   __  \\|\\   ____\\\\___   ___\\\\   __  \\|\\  ___ \\     ");
-        System.out.println("\\|___ \\  \\_\\ \\  \\ \\  \\___\\|___ \\  \\_\\ \\  \\|\\  \\ \\  \\___\\|___ \\  \\_\\ \\  \\|\\  \\ \\   __/|    ");
-        System.out.println("     \\ \\  \\ \\ \\  \\ \\  \\       \\ \\  \\ \\ \\   __  \\ \\  \\       \\ \\  \\ \\ \\  \\\\\\  \\ \\  \\_|/__  ");
-        System.out.println("      \\ \\  \\ \\ \\  \\ \\  \\____   \\ \\  \\ \\ \\  \\ \\  \\ \\  \\____   \\ \\  \\ \\ \\  \\\\\\  \\ \\  \\_|\\ \\ ");
-        System.out.println("       \\ \\__\\ \\ \\__\\ \\_______\\  \\ \\__\\ \\ \\__\\ \\__\\ \\_______\\  \\ \\__\\ \\ \\_______\\ \\_______\\");
-        System.out.println("        \\|__|  \\|__|\\|_______|   \\|__|  \\|__|\\|__|\\|_______|   \\|__|  \\|_______|\\|_______|");
-        System.out.println("");
     }
 }
